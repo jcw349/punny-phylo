@@ -17,17 +17,25 @@ def rename_tips(tree, rename_dict):
 def args():
     parser = argparse.ArgumentParser(description="Read a Newick tree using treeswift to rescale tree by clock rate.")
     parser.add_argument("-t","--treefile", help="Path to the Newick tree file")
-    parser.add_argument('-r', '--rename', required=True, type=str, help="Comma separated list of names to rename (csv)")
+    parser.add_argument("-r","--rename", required=True, type=str, help="Tab separated list of names to rename (tsv)")
+    parser.add_argument("-h","--has_header", type=bool, default=True, help="Indicate whether the TSV rename file has a header")
     parser.add_argument("-d","--output_dir", type=str, default=".", help="Output directory (default: current directory)")
     parser.add_argument("-o","--output_prefix", type=str, default="scaled_tree", help="Output file prefix (default: 'scaled_tree')")
     args = parser.parse_args()
 
     tree = ts.read_tree_newick(args.treefile)
 
-    if isfile(args.rename):
-        print("\nRenaming tips")
-        renameDict = pd.read_csv(args.rename, sep=',', header=0, names=["old","new"]).set_index("old").squeeze().to_dict()
-        tree = rename_tips(tree, renameDict)
+    try:
+        if isfile(args.rename):
+            print("\nRenaming tips")
+            
+            h=0 if args.has_header else None
+            renameDict = pd.read_csv(args.rename, sep='\t', header=h, names=["old","new"]).set_index("old").squeeze().to_dict()
+            tree = rename_tips(tree, renameDict)
+    except FileNotFoundError:
+        print("Error: The tree file does not exist.")
+    except IOError:
+        print("Error: Could not read the file")
 
     # create output directory if it doesn't exist
     try:
