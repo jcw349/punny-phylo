@@ -16,7 +16,7 @@ python rename_tips.py \
     -d "/path/to/output/directory/" \
     -o "output_filename_prefix"
 ```
-Output </path/to/output/directory>/<output_filename_prefix>.nwk
+Output <path_to_output_directory>/<output_filename_prefix>.nwk
 
 ## Nexus
 ### merge_nexus_annot
