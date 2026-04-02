@@ -4,7 +4,7 @@ Python Utilities for Newick and Nexus Yare Phylogenetic tree editing
 # Dependencies
 Install dependencies first before running punny-phylo tools.
 - [treeswift](https://github.com/niemasd/TreeSwift?tab=readme-ov-file)
-
+- [pandas](https://pandas.pydata.org/)
 
 # Usage
 ## Newick:
