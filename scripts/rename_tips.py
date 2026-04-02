@@ -15,7 +15,7 @@ def rename_tips(tree, rename_dict):
 
 
 def args():
-    parser = argparse.ArgumentParser(description="Read a Newick tree using treeswift to rescale tree by clock rate.")
+    parser = argparse.ArgumentParser(description="Read a Newick tree using treeswift to rename taxa labels.")
     parser.add_argument("-t","--treefile", help="Path to the Newick tree file")
     parser.add_argument("-r","--rename", required=True, type=str, help="Tab separated list of names to rename (tsv)")
     parser.add_argument("-h","--has_header", type=bool, default=True, help="Indicate whether the TSV rename file has a header")
