@@ -5,8 +5,6 @@ import treeswift as ts
 def arguments():
     parser = argparse.ArgumentParser(description="Read a Nexus tree using treeswift to merge trees with annotations.")
     parser.add_argument("-t","--treefiles", nargs="+", type=str, help="Paths to the Nexus tree files")
-    #parser.add_argument("-c","--collapse_polytomies", type=float, default=None, help="Collapse internal branches (not terminal branches) with length less than or equal to threshold. A branch length of None is considered 0 [default=False]")
-    #parser.add_argument("-p","--resolve_polytomies", type=bool, default=False, help="Resolve internal branches with 0 dist into polytomies with length less than or equal to threshold. [default=False]")
     parser.add_argument("-d","--output_dir", type=str, default=".", help="Output directory (default: current directory)")
     parser.add_argument("-o","--output_filename", type=str, default="merged_tree.nexus.tree", help="Output filenames (default: 'merged_tree.nexus.tree')")
     args = parser.parse_args()
