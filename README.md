@@ -1,4 +1,4 @@
-# punny
+# punny-phylo
 Python Utilities for Newick and Nexus Yare Phylogenetic tree editing
 
 # Dependencies
