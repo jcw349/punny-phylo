@@ -1,5 +1,5 @@
 # punny
-Python Utilities for Newick and Nexus Yare tree editing
+Python Utilities for Newick and Nexus Yare Phylogenetic tree editing
 
 # Dependencies
 - [treeswift](https://github.com/niemasd/TreeSwift?tab=readme-ov-file)
