@@ -20,7 +20,7 @@ def args():
     parser.add_argument("-r","--rename", required=True, type=str, help="Tab separated list of names to rename (tsv)")
     parser.add_argument("-h","--has_header", type=bool, default=True, help="Indicate whether the TSV rename file has a header")
     parser.add_argument("-d","--output_dir", type=str, default=".", help="Output directory (default: current directory)")
-    parser.add_argument("-o","--output_prefix", type=str, default="scaled_tree", help="Output file prefix (default: 'scaled_tree')")
+    parser.add_argument("-o","--output_prefix", type=str, default="renamed_tree", help="Output file prefix (default: 'renamed_tree')")
     args = parser.parse_args()
 
     tree = ts.read_tree_newick(args.treefile)
