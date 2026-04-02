@@ -3,12 +3,12 @@ import os
 import treeswift as ts
 
 def args():
-    parser = argparse.ArgumentParser(description="Read a Newick tree using treeswift to rescale tree by clock rate.")
+    parser = argparse.ArgumentParser(description="Read a Newick tree using treeswift to collapse or resolve polytomies.")
     parser.add_argument("-t","--treefile", help="Path to the Newick tree file")
-    parser.add_argument("-c","--collapse_polytomies", type=float, default=None, help="Collapse internal branches (not terminal branches) with length less than or equal to threshold. A branch length of None is considered 0 [default=False]")
+    parser.add_argument("-c","--collapse_polytomies", type=float, default=None, help="Collapse internal branches (not terminal branches) with length less than or equal to threshold. A branch length of None will not be performed [default=False]")
     parser.add_argument("-p","--resolve_polytomies", type=bool, default=False, help="Resolve internal branches with 0 dist into polytomies with length less than or equal to threshold. [default=False]")
     parser.add_argument("-d","--output_dir", type=str, default=".", help="Output directory (default: current directory)")
-    parser.add_argument("-o","--output_prefix", type=str, default="scaled_tree", help="Output file prefix (default: 'scaled_tree')")
+    parser.add_argument("-o","--output_prefix", type=str, default="reshaped_tree", help="Output file prefix (default: 'reshaped_tree')")
     args = parser.parse_args()
     
     oPath = os.makedirs(args.output_dir, exist_ok=True)
