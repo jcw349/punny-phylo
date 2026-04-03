@@ -50,11 +50,15 @@ def write_tree_file(tree, output_dir, output_filename, file_type):
             t = tree['tree1']
         else:
             t = tree
-        if file_type.lower() == "nexus":
-            t.write_tree_nexus(output_dir + "/"+ output_filename)
-        elif file_type.lower() == "newick":
-            t.write_tree_newick(output_dir + "/"+ output_filename)
-        print(f"Tree successfully written to {output_dir}/{output_filename}")
+        try:
+            if file_type.lower() == "nexus":
+                t.write_tree_nexus(output_dir + "/"+ output_filename)
+                print(f"Tree successfully written to {output_dir}/{output_filename}")
+            elif file_type.lower() == "newick":
+                t.write_tree_newick(output_dir + "/"+ output_filename)
+                print(f"Tree successfully written to {output_dir}/{output_filename}")
+        except Exception as e:
+            print(f"Error writing tree to {output_dir}/{output_filename}: {e}")
     except Exception as e:
         print(f"Error writing tree to {output_dir}/{output_filename}: {e}")
 

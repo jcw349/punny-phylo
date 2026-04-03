@@ -1,6 +1,5 @@
 import argparse
-import punny_io as pio
-#import punny_utils as pu
+import scripts.punny_io as pio
 
 
 def arguments():
@@ -47,7 +46,7 @@ def run_merge(trees, tree_type):
     if len(set(tree_type)) > 1:
         print("Warning: Attempting to merge trees of different file types. Multiple input file types are not recommended, but will proceed.")
     
-    from punny_utils import merge_trees
+    from scripts.punny_utils import merge_trees
     merged_tree = merge_trees(trees)
     return merged_tree
 
@@ -59,7 +58,7 @@ def run_rename(trees, rename_dict, has_header):
         exit(1)
     rename_dict = pio.read_table_as_dict(rename_dict, has_header)
     
-    from punny_utils import rename_tips
+    from scripts.punny_utils import rename_tips
     logs = dict({"function": [],
                  "log": []})
     for idx, tree in enumerate(trees):
@@ -73,7 +72,7 @@ def run_branch_rescale(trees, clock_rate, oper="dist_to_time"):
     if not clock_rate:
         print("Error: Attempting to rescale branches, but no clock rate provided.")
         exit(20)
-    from punny_utils import rescale_branches
+    from scripts.punny_utils import rescale_branches
     op = True if oper == "dist_to_time" else False
     for idx, tree in enumerate(trees):
         trees[idx] = rescale_branches(tree, clock_rate, to_time=op)
@@ -84,7 +83,7 @@ def run_collapse(trees, threshold):
     if not threshold:
         print("Error: Attempting to collapse branches, but no threshold provided.")
         exit(30)
-    from punny_utils import collapse_polytomies
+    from scripts.punny_utils import collapse_polytomies
     
     for idx, tree in enumerate(trees):
         trees[idx] = collapse_polytomies(tree, threshold)
@@ -92,7 +91,7 @@ def run_collapse(trees, threshold):
 
 
 def run_resolve(trees):
-    from punny_utils import resolve_polytomies
+    from scripts.punny_utils import resolve_polytomies
     for idx, tree in enumerate(trees):
         trees[idx] = resolve_polytomies(tree)
     return trees
@@ -102,7 +101,7 @@ def run_reroot(trees, root, length, support):
     if not isinstance(root):
         print("Error: must provide the root node or leaf node to root the tree.")
         exit(32)
-    from punny_utils import reroot_tree
+    from scripts.punny_utils import reroot_tree
     for idx, tree in enumerate(trees):
         tree[idx] = reroot_tree(tree, root, length, support)
 
@@ -112,13 +111,12 @@ def write_output(trees, output_dir, output_filename, output_type):
     if len(trees) > 1:
         output_filenames = [args.output_filename.replace(".tree", f"_{i+1}.tree") for i in range(len(trees))]
         for i, tree in enumerate(trees):
-            pio.write_tree_file(tree, output_dir, output_filename, output_type[i])
+            pio.write_tree_file(tree, output_dir, output_filenames, output_type[i])
     else:
-        pio.write_tree_file(trees[0], output_dir, output_filename, output_type[0])
+        pio.write_tree_file(trees[0], output_dir, output_filename, output_type)
 
 
-if __name__ == "__main__":
-    args = arguments()
+def run_functions(args):
     tree_files, input_types = pio.get_tree_file(args.treefiles)
     logs = dict()
     
@@ -148,10 +146,10 @@ if __name__ == "__main__":
 
     # check output file type
     if args.output_type is None:
-        if len(tree_files) == len(input_types):
+        if len(tree_files)==1 and (len(tree_files) == len(set(input_types))):
+            output_types = list(set(input_types))[0]
+        elif len(tree_files) == len(input_types):
             output_types = input_types
-        elif len(tree_files) == len(set(input_types)):
-            output_types = input_types[0]
         elif len(set(input_types)) > 1:
             print("Warning: Multiple input file types detected and no output file type specified. Attempting to write different number of trees. Output file type will be set to the first input file type.")
             output_types = input_types[0] * len(tree_files)
@@ -163,4 +161,10 @@ if __name__ == "__main__":
     
     # write output
     write_output(tree_files, args.output_dir, args.output_filename, output_types)
+
+
+if __name__ == "__main__":
+    args = arguments()
+    run_functions(args)
+    
     
