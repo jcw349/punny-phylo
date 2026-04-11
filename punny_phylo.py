@@ -1,16 +1,20 @@
 import argparse
 import scripts.punny_io as pio
 
-
 def arguments():
     parser = argparse.ArgumentParser(description="Read a tree file using treeswift to merge trees with annotations.")
     parser.add_argument("-t","--treefiles", nargs="+", type=str, help="Paths to the tree files")
     parser.add_argument("-d","--output_dir", type=str, default=".", help="Output directory (default: current directory)")
     parser.add_argument("-o","--output_filename", type=str, default="merged_tree.nexus.tree", help="Output filenames (default: 'merged_tree.nexus.tree')")
-    parser.add_argument("-O", "--output_type", choices=["nexus", "newick"], default=None, help="Indicate the output file type of the tree file. [default: same as input file type]")       
+    parser.add_argument("-O","--output_type", choices=["nexus", "newick"], default=None, help="Indicate the output file type of the tree file. [default: same as input file type]")       
     # merge parser
     mrg = parser.add_argument_group(title="Merge options for annotated trees", description="Options for merging NEXUS annotated trees")
     mrg.add_argument("-m","--merge_annot", action="store_true", help="Merge NEXUS trees with annotations. Requires multiple tree files as input. [example: --treefiles tree1.nexus tree2.nexus]")
+    mrg.add_argument('-N',"--node_label", type=str, default="label", help="Provide node ID label (Default=label)")
+    #mrg.add_argument('-D',"--get_dates", nargs="+", type=bool, default=[False], help="Provide node ID label (Default=[False])")
+    mrg.add_argument('-a',"--add_annotations", type=str, default=None, help="Comma separated filepaths to tab delimited tables of annotations to add to the merged tree, where the first column is [Node_ID] and all other columns will be added, index of table matches the index of the trees. [default: None]")
+    mrg.add_argument('-A',"--annotation_table", action="store_true", default=False, help="Export tab delimited table of nodes and their annotations")
+    
     
     # rename parser
     rn = parser.add_argument_group(title="Rename options", description="Options for renaming taxa labels in tree file(s). Required if --rename is selected.")
@@ -36,6 +40,14 @@ def arguments():
     args = parser.parse_args()
 
     return args
+
+
+def run_add_annotations(trees, annotations, tree_node_labels='label'):
+    from scripts.punny_utils import set_annotations
+
+    annots = [ pio.read_table(fp, skip_rows=1) for fp in annotations.split(",") ]
+    trees = [ set_annotations(trees[tid], annot) if annot is not None else trees[tid] for tid, annot in enumerate(annots) ]
+    return trees
 
 
 def run_merge(trees, tree_type):
@@ -106,27 +118,44 @@ def run_reroot(trees, root, length, support):
         tree[idx] = reroot_tree(tree, root, length, support)
 
 
-def write_output(trees, output_dir, output_filename, output_type):
+def get_node_annotations(trees, node_id_key='label'):
+    from scripts.punny_utils import get_annotations
+    tree_annot =  [ get_annotations(tree, node_key=node_id_key) for tree in trees]
+    return tree_annot
+
+def write_output(trees, output_dir, output_filename, output_type, table_list):
     # write output tree file(s)
     if len(trees) > 1:
-        output_filenames = [args.output_filename.replace(".tree", f"_{i+1}.tree") for i in range(len(trees))]
+        output_filenames = ["".join(args.output_filename.rsplit(".", 1)[:-1])+"_{i+1}.tree" for i in range(len(trees))]
         for i, tree in enumerate(trees):
             pio.write_tree_file(tree, output_dir, output_filenames, output_type[i])
     else:
         pio.write_tree_file(trees[0], output_dir, output_filename, output_type)
 
+    if table_list:
+        for ext, t in table_list:
+            output_filename = "_".join(["".join(args.output_filename.rsplit(".", 1)[:-1]),ext]) if "." in args.output_filename else "_".join([args.output_filename,ext])
+            pio.export_file(t, output_dir, output_filename)
+
 
 def run_functions(args):
     tree_files, input_types = pio.get_tree_file(args.treefiles)
     logs = dict()
-    
+
+
+    if args.add_annotations:
+        tree_files = run_add_annotations(tree_files, args.add_annotations, args.node_label)
+
+
     if args.merge_annot:
         # merge function is selected, return type is a single tree
         tree_files = [run_merge(tree_files, input_types)]
-    
+
+
     if args.rename_table:
         # rename function is selected
-        tree_files, logs = run_rename(tree_files, args.rename_table, args.has_header)
+        tree_files, log = run_rename(tree_files, args.rename_table, args.has_header)
+        logs.update(log)
 
     # one of the rescaling functions are selected
     if args.dist_to_time:
@@ -143,6 +172,10 @@ def run_functions(args):
     if args.reroot_tree:
         tree_files = run_reroot(tree_files, args.reroot_tree, args.root_length, args.root_support)
 
+    if args.annotation_table:
+        import pandas as pd
+        annot_df = get_node_annotations(tree_files, node_id_key=args.node_label)
+        exp_tables = [('annotation.txt',annot_df[0])]
 
     # check output file type
     if args.output_type is None:
@@ -157,10 +190,13 @@ def run_functions(args):
             print("Warning: Only writing 1 tree file with multiple input file types and no output file type specified. Output file type will be set to the first input file type.")
             output_types = input_types[0]
     else:
-        output_types = args.output_types
+        output_types = args.output_type
     
+    if len(logs)>0:
+        exp_tables.append(('logs',logs))
+
     # write output
-    write_output(tree_files, args.output_dir, args.output_filename, output_types)
+    write_output(tree_files, args.output_dir, args.output_filename, output_types, exp_tables)
 
 
 if __name__ == "__main__":

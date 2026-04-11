@@ -2,7 +2,7 @@ import argparse
 import os
 import treeswift as ts
 import pandas as pd
-
+import json
 
 def get_tree_file(input_file):
     trees = []
@@ -40,6 +40,13 @@ def read_table_as_dict(table_path, has_header=True):
         print("Error: Could not read the file")
 
 
+def read_table(table_path, skip_rows=0):
+    if os.path.exists(table_path):
+        df = pd.read_csv(table_path, sep="\t", skiprows=skip_rows)
+        df.columns = ['NODE_ID']+ list(df.columns)[1:]
+        return df
+    
+
 def write_tree_file(tree, output_dir, output_filename, file_type):
     #oPath = os.makedirs(output_dir, exist_ok=True)
     if not os.path.exists(output_dir):
@@ -62,3 +69,21 @@ def write_tree_file(tree, output_dir, output_filename, file_type):
     except Exception as e:
         print(f"Error writing tree to {output_dir}/{output_filename}: {e}")
 
+
+def export_file(data, output_dir, output_filename):
+    if not os.path.exists(output_dir):
+        print(f"Output directory {output_dir} does not exist. Creating directory.")
+        os.makedirs(output_dir, exist_ok=True)
+    try:
+        filepath = os.path.join(output_dir,output_filename)
+        if isinstance(data, dict):
+            with open(filepath, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=4)
+                print(f"Successfully written json to {filepath}")
+        elif isinstance(data, pd.DataFrame):
+            data.to_csv(filepath, sep='\t', index=False)
+            print(f"Successfully written table to {filepath}")
+        else:
+            print(f"Warning, unrecognized filetype: {data}")
+    except Exception as e:
+        print(f"Error writing output file to {filepath}: {e}")
