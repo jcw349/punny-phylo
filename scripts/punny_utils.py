@@ -160,12 +160,12 @@ def get_annotations(tree, node_key='label'):
         elif n.is_leaf():
             # leaf nodes
             nid = n.label
-        elif not n.label:
-            # internal nodes
-            n.set_label(nid)
         else:
             print(f"Warning: No labels found in label ({n.label}) or param ({n.node_params})")
         
+        if (not n.label) and nid:
+            # internal nodes
+            n.set_label(nid)
 
         if len(key)==0:
             annot_dict['node_id'].append(nid)

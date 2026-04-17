@@ -176,7 +176,9 @@ def run_functions(args):
         import pandas as pd
         annot_df = get_node_annotations(tree_files, node_id_key=args.node_label)
         exp_tables = [('annotation.txt',annot_df[0])]
-
+    else:
+        exp_tables = None
+        
     # check output file type
     if args.output_type is None:
         if len(tree_files)==1 and (len(tree_files) == len(set(input_types))):
