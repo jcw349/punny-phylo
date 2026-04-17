@@ -166,13 +166,15 @@ def get_annotations(tree, node_key='label'):
         if (not n.label) and nid:
             # internal nodes
             n.set_label(nid)
+        
+        node_id = n.label
 
         if len(key)==0:
-            annot_dict['node_id'].append(nid)
+            annot_dict['node_id'].append(node_id)
             annot_dict['labels'].append("")
             annot_dict['values'].append("")
         else:
-            annot_dict['node_id'].extend([nid]*(len(key)))
+            annot_dict['node_id'].extend([node_id]*(len(key)))
             annot_dict['labels'].extend(key)
             annot_dict['values'].extend(val)
     df = pd.DataFrame(annot_dict)
