@@ -155,11 +155,12 @@ def get_annotations(tree, node_key='label'):
         val = list(val)
         if (node_key in key):
             # internal nodes
-            nid = val.pop(key.index(node_key))
-            key.pop(key.index(node_key))
+            nid = val[key.index(node_key)]
+            lbl = key[key.index(node_key)]
         elif n.is_leaf():
             # leaf nodes
             nid = n.label
+            lbl = n.label
         else:
             print(f"Warning: No labels found in label ({n.label}) or param ({n.node_params})")
         
